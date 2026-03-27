@@ -1,0 +1,6 @@
+{
+  "name": "{plugin-name}",
+  "description": "{one-line description}",
+  "source": "./plugins/{plugin-name}",
+  "category": "productivity"
+}

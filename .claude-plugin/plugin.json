@@ -1,0 +1,9 @@
+{
+  "name": "b2x-utilities",
+  "version": "1.0.0",
+  "description": "Plugin lifecycle utilities — package repos as plugins and push updates to the b2x-local marketplace",
+  "author": {
+    "name": "Luis Capobianco"
+  },
+  "keywords": ["plugin", "utilities", "marketplace", "b2x", "packaging"]
+}
