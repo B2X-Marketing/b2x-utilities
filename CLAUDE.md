@@ -8,6 +8,7 @@ Plugin lifecycle utilities for B2X Marketing. Two skills for managing the b2x-lo
 |-------|---------|---------|
 | `make-a-plugin` | "make this a plugin", "package as plugin" | Convert a repo into a registered plugin |
 | `push-plugin-update` | "push plugin update", "bump plugin version" | Deploy changes from source to runtime |
+| `export-to-apple-notes` | "save to Apple Notes", "post to Notes", "export to Notes" | Format and post content to Apple Notes via MCP |
 
 ## b2x-local Marketplace Architecture
 
