@@ -1,6 +1,32 @@
 # Push Plugin Update Workflow
 
-Deploy changes from a plugin source repository so they take effect in the Claude Code runtime.
+Deploy changes from a plugin inside a marketplace repo so they take effect in the Claude Code runtime.
+
+---
+
+## Architecture Reference
+
+Plugins live inside marketplace repos:
+
+```
+b2x-marketplace-{domain}/
+├── .claude-plugin/
+│   └── marketplace.json            # Lists all plugins with versions
+└── plugins/
+    └── {plugin-name}/
+        ├── .claude-plugin/
+        │   └── plugin.json         # Plugin metadata + version
+        └── skills/
+```
+
+The `b2x-local` runtime marketplace symlinks to each plugin directory.
+
+### Known Marketplace Repos
+
+| Repo | Location |
+|---|---|
+| `b2x-marketplace-marketing` | `Projects/GitHub/b2x-marketplace-marketing` |
+| `b2x-marketplace-utilities` | `Projects/GitHub/b2x-marketplace-utilities` |
 
 ---
 
@@ -8,17 +34,21 @@ Deploy changes from a plugin source repository so they take effect in the Claude
 
 Determine which plugin to update:
 
-**If run from a repo directory:**
-1. Read `.claude-plugin/plugin.json` from the repo root
-2. Extract the `name` field — this is the plugin name
-3. Extract the current `version` field
+**If run from a marketplace repo directory:**
+1. List directories under `plugins/`
+2. If only one plugin exists, use it automatically
+3. If multiple plugins exist, ask the user which one to update
+4. Read `plugins/{plugin-name}/.claude-plugin/plugin.json`
+5. Extract the `name` and current `version` fields
 
 **If given a plugin name:**
-1. Read `~/.claude/plugins/marketplaces/b2x-local/.claude-plugin/marketplace.json`
-2. Find the entry matching the given name
-3. Resolve the `source` path (relative to marketplace dir) to get the repo path
-4. Follow the symlink to the actual repo
-5. Read `.claude-plugin/plugin.json` from the resolved repo path
+1. Search across known marketplace repos for `plugins/{name}/.claude-plugin/plugin.json`
+2. Check `b2x-marketplace-marketing` and `b2x-marketplace-utilities`
+3. Read the matching `plugin.json`
+
+**If run from inside a plugin subdirectory** (e.g., inside `plugins/{name}/`):
+1. Look for `.claude-plugin/plugin.json` relative to the current directory
+2. Determine the parent marketplace repo from the path
 
 Fail with a clear error if `plugin.json` is not found.
 
@@ -36,7 +66,9 @@ If the user requests skip-bump (cache-only refresh):
 - Keep the current version unchanged
 - Still proceed with cache clearing and reinstall
 
-Write the updated version back to `.claude-plugin/plugin.json`.
+Update the version in two places:
+1. `plugins/{plugin-name}/.claude-plugin/plugin.json` — the `version` field
+2. `{marketplace-repo}/.claude-plugin/marketplace.json` — the `version` field in the matching plugin entry (if present)
 
 ## Step 3: Cache Invalidation
 
@@ -75,6 +107,7 @@ claude plugin install {plugin-name}@b2x-local
 
 ```
 Plugin: {plugin-name}
+Marketplace repo: {marketplace-repo-name}
 Version: {old-version} → {new-version}
 Skills:
   - {skill-1}
@@ -84,9 +117,9 @@ Cache: ~/.claude/plugins/cache/b2x-local/{plugin-name}/{new-version}/
 
 ## Step 6: Git Commit (Optional)
 
-If the version was bumped, offer to commit the change:
+If the version was bumped, offer to commit the change in the marketplace repo:
 
-- Stage: `git add .claude-plugin/plugin.json`
+- Stage: `git add plugins/{plugin-name}/.claude-plugin/plugin.json .claude-plugin/marketplace.json`
 - Message: `chore: bump {plugin-name} to v{new-version}`
 - Do not push unless explicitly asked
 
@@ -96,7 +129,8 @@ If the user declines, leave the change unstaged.
 
 ## Troubleshooting
 
-**Plugin not found in marketplace:**
+**Plugin not found in marketplace repo:**
+- Verify the plugin directory exists: `ls {marketplace-repo}/plugins/{plugin-name}/`
 - Verify the symlink exists: `ls -la ~/.claude/plugins/marketplaces/b2x-local/plugins/{plugin-name}`
 - If missing, suggest running **make-a-plugin** first
 

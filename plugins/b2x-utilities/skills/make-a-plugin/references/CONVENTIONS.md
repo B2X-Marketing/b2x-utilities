@@ -80,14 +80,17 @@ Optional additional references:
 
 ---
 
-## Plugin Name Convention
+## Naming Conventions
 
+### Marketplace Repos
+- Pattern: `b2x-marketplace-{domain}` (e.g., `b2x-marketplace-marketing`, `b2x-marketplace-utilities`)
+
+### Plugins
 - Kebab-case, lowercase
 - Prefix with `b2x-` for B2X Marketing plugins
-- Examples: `b2x-marketing-toolkit`, `b2x-utilities`, `b2x-search-intelligence`
+- Examples: `b2x-utilities`, `strategy`, `search-intelligence`
 
-## Skill Name Convention
-
+### Skills
 - Kebab-case, lowercase
 - Descriptive action or noun: `make-a-plugin`, `market-research`, `swot-analysis`
 - Match the directory name exactly
@@ -95,14 +98,18 @@ Optional additional references:
 ## Directory Layout
 
 ```
-{plugin-repo}/
+b2x-marketplace-{domain}/              # Marketplace repo (git)
 ├── .claude-plugin/
-│   └── plugin.json
+│   └── marketplace.json                # Lists all plugins
 ├── CLAUDE.md
-├── skills/
-│   └── {skill-name}/
-│       ├── SKILL.md          (< 2,100 chars)
-│       └── references/
-│           ├── WORKFLOW.md   (required)
-│           └── ...           (optional)
+└── plugins/
+    └── {plugin-name}/                  # One per plugin
+        ├── .claude-plugin/
+        │   └── plugin.json             # Plugin metadata
+        └── skills/
+            └── {skill-name}/
+                ├── SKILL.md            (< 2,100 chars)
+                └── references/
+                    ├── WORKFLOW.md      (required)
+                    └── ...             (optional)
 ```

@@ -6,7 +6,7 @@ description: >
   "make this a plugin", "turn this repo into a plugin", "package as plugin",
   "register this in b2x-local", "create plugin from repo", or wants to convert
   any project directory into an installable Claude Code plugin with skills.
-version: 1.0.0
+version: 1.1.0
 author: Luis Capobianco
 tags:
   - plugin
@@ -17,33 +17,34 @@ tags:
 
 # Make a Plugin
 
-Convert a B2X project repository into a Claude Code plugin registered in the b2x-local marketplace.
+Package a B2X project as a Claude Code plugin inside a marketplace repo, registered in b2x-local.
 
 Read `references/WORKFLOW.md` for the full execution protocol.
 Read `references/CONVENTIONS.md` for SKILL.md authoring rules.
 
 ## Inputs
 
-- **Required:** Path to the target repo (or current working directory)
-- **Optional:** Plugin name override (default: repo dir name, kebab-case); explicit skill list
+- **Required:** Path to the source project repo (or current working directory)
+- **Optional:** Target marketplace repo (default: ask user); plugin name override (default: repo dir name, kebab-case); explicit skill list
 
 ## Workflow
 
-1. Analyze the repo: read CLAUDE.md, scan for `.claude/skills/`, INSTRUCTIONS.md, modules
+1. Analyze the source repo: read CLAUDE.md, scan for existing skills, modules, docs
 2. Identify candidate skills, present table to user for approval
-3. Create `.claude-plugin/plugin.json` at repo root
-4. Create `skills/` directory with one subdirectory per skill
-5. Write each SKILL.md (under ~2,100 chars) with frontmatter + `references/`
-6. Move detailed content (instructions, frameworks, templates) into `references/`
-7. Update repo CLAUDE.md with plugin structure section
-8. Read-merge-write marketplace.json to add the new plugin entry
-9. Create symlink in `~/.claude/plugins/marketplaces/b2x-local/plugins/`
-10. Clear stale cache, install via `claude plugin install {name}@b2x-local`
-11. Verify in `installed_plugins.json`, list cached skills, validate frontmatter
+3. Ask user which marketplace repo to add the plugin to (b2x-marketplace-marketing or b2x-marketplace-utilities)
+4. Create `plugins/{plugin-name}/.claude-plugin/plugin.json` inside the marketplace repo
+5. Create `plugins/{plugin-name}/skills/` with one subdirectory per skill
+6. Write each SKILL.md (under ~2,100 chars) with frontmatter + `references/`
+7. Move detailed content into `references/` subdirectories
+8. Read-merge-write the marketplace repo's `.claude-plugin/marketplace.json`
+9. Read-merge-write `b2x-local` marketplace.json to add the new plugin entry
+10. Create symlink in b2x-local pointing to `{marketplace-repo}/plugins/{plugin-name}`
+11. Clear stale cache, install via `claude plugin install {name}@b2x-local`
+12. Verify in `installed_plugins.json`, list cached skills, validate frontmatter
 
 ## Output
 
-Plugin with `.claude-plugin/plugin.json` and `skills/` tree, registered and installed in b2x-local.
+Plugin under `{marketplace-repo}/plugins/{plugin-name}/` with skills, registered and installed in b2x-local.
 
 ## Cross-References
 
