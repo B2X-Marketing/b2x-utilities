@@ -1,8 +1,25 @@
-# B2X Utilities
+# B2X Marketplace — Utilities
 
-Plugin lifecycle utilities for B2X Marketing. Two skills for managing the b2x-local Claude Code plugin marketplace.
+Marketplace repo for utility plugins. Contributes plugins to the `b2x-local` Claude Code marketplace.
 
-## Skills
+## Structure
+
+```
+b2x-marketplace-utilities/
+├── .claude-plugin/
+│   └── marketplace.json          # Marketplace definition
+└── plugins/
+    └── b2x-utilities/            # Plugin: lifecycle tools + Apple Notes export
+        ├── .claude-plugin/plugin.json
+        └── skills/
+            ├── make-a-plugin/
+            ├── push-plugin-update/
+            └── export-to-apple-notes/
+```
+
+## Plugins
+
+### b2x-utilities
 
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
@@ -12,17 +29,16 @@ Plugin lifecycle utilities for B2X Marketing. Two skills for managing the b2x-lo
 
 ## b2x-local Marketplace Architecture
 
-All B2X plugins are registered in a local marketplace at:
+Two source repos feed into a single runtime marketplace:
 
-```
-~/.claude/plugins/marketplaces/b2x-local/
-├── .claude-plugin/
-│   └── marketplace.json          # Lists all plugins
-└── plugins/
-    ├── b2x-marketing-toolkit/    # Symlink → source repo
-    ├── b2x-utilities/            # Symlink → source repo
-    └── ...
-```
+| Source repo | Plugins contributed |
+|---|---|
+| `b2x-marketplace-marketing` | strategy, search-intelligence |
+| `b2x-marketplace-utilities` | b2x-utilities |
+
+Runtime location: `~/.claude/plugins/marketplaces/b2x-local/`
+
+Symlinks in `b2x-local/plugins/` point to each plugin's `plugins/<name>/` directory in the source repo.
 
 ### Key Paths
 
@@ -30,13 +46,6 @@ All B2X plugins are registered in a local marketplace at:
 - **Known Marketplaces**: `~/.claude/plugins/known_marketplaces.json`
 - **Installed Plugins**: `~/.claude/plugins/installed_plugins.json`
 - **Plugin Cache**: `~/.claude/plugins/cache/b2x-local/{plugin-name}/{version}/`
-
-### How It Works
-
-1. Each plugin source repo has `.claude-plugin/plugin.json` and a `skills/` directory
-2. A symlink in `b2x-local/plugins/` points to the source repo
-3. `claude plugin install {name}@b2x-local` copies the source into the cache
-4. Claude Code loads skills from the cache at session start
 
 ### Update Flow
 

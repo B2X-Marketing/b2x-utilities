@@ -1,0 +1,21 @@
+{
+  "name": "b2x-marketplace-utilities",
+  "owner": {
+    "name": "Luis Capobianco"
+  },
+  "metadata": {
+    "description": "Utility plugins for Claude Code plugin lifecycle management and content export",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "b2x-utilities",
+      "source": "./plugins/b2x-utilities",
+      "description": "Plugin lifecycle utilities — package repos as plugins, push updates, and export content to Apple Notes",
+      "version": "1.1.0",
+      "author": { "name": "Luis Capobianco" },
+      "category": "productivity",
+      "keywords": ["plugin", "utilities", "marketplace", "packaging", "apple-notes"]
+    }
+  ]
+}
