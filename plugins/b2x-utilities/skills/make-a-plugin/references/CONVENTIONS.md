@@ -1,6 +1,6 @@
-# B2X Skill Authoring Conventions
+# Skill Authoring Conventions
 
-Rules for writing SKILL.md files and structuring plugin skills across all B2X projects.
+Rules for writing SKILL.md files and structuring plugin skills.
 
 ---
 
@@ -34,7 +34,7 @@ tags:
 - **name**: kebab-case, matches the directory name
 - **description**: must be third-person ("This skill should be used when..."), include 3-6 quoted trigger phrases the user would say
 - **version**: semver, starts at 1.0.0
-- **author**: always `Luis Capobianco` for B2X skills
+- **author**: author name (from marketplace repo owner or user-provided)
 - **tags**: 3-6 relevant keywords
 
 ### Body Structure
@@ -82,13 +82,9 @@ Optional additional references:
 
 ## Naming Conventions
 
-### Marketplace Repos
-- Pattern: `b2x-marketplace-{domain}` (e.g., `b2x-marketplace-marketing`, `b2x-marketplace-utilities`)
-
 ### Plugins
 - Kebab-case, lowercase
-- Prefix with `b2x-` for B2X Marketing plugins
-- Examples: `b2x-utilities`, `strategy`, `search-intelligence`
+- Examples: `b2x-utilities`, `strategy`, `search-intelligence`, `customer-management`
 
 ### Skills
 - Kebab-case, lowercase
@@ -98,7 +94,7 @@ Optional additional references:
 ## Directory Layout
 
 ```
-b2x-marketplace-{domain}/              # Marketplace repo (git)
+{marketplace-repo}/              # Marketplace repo (git)
 ├── .claude-plugin/
 │   └── marketplace.json                # Lists all plugins
 ├── CLAUDE.md

@@ -1,6 +1,19 @@
-# Push Plugin Update Workflow
+# Local Publish Plugin Workflow
 
-Deploy changes from a plugin inside a marketplace repo so they take effect in the Claude Code runtime.
+Publish changes from a plugin inside a marketplace repo to the local Claude Code runtime. This is a local-only operation — it does not push to GitHub or any remote marketplace.
+
+---
+
+## Step 0: Marketplace Discovery
+
+Determine which local marketplace to target:
+
+1. Read `~/.claude/plugins/known_marketplaces.json`
+2. Filter entries where `source.source` is `"directory"` — these are local marketplaces
+3. If exactly one exists, use its key as `{marketplace}`
+4. If multiple exist, present them to the user and ask which one to target
+5. If none exist, abort: "No local (directory-type) marketplace found in known_marketplaces.json"
+6. Confirm the marketplace directory exists: `~/.claude/plugins/marketplaces/{marketplace}/`
 
 ---
 
@@ -9,7 +22,7 @@ Deploy changes from a plugin inside a marketplace repo so they take effect in th
 Plugins live inside marketplace repos:
 
 ```
-b2x-marketplace-{domain}/
+{marketplace-repo}/
 ├── .claude-plugin/
 │   └── marketplace.json            # Lists all plugins with versions
 └── plugins/
@@ -19,14 +32,15 @@ b2x-marketplace-{domain}/
         └── skills/
 ```
 
-The `b2x-local` runtime marketplace symlinks to each plugin directory.
+The `{marketplace}` runtime marketplace symlinks to each plugin directory.
 
-### Known Marketplace Repos
+### Discovering Marketplace Repos
 
-| Repo | Location |
-|---|---|
-| `b2x-marketplace-marketing` | `Projects/GitHub/b2x-marketplace-marketing` |
-| `b2x-marketplace-utilities` | `Projects/GitHub/b2x-marketplace-utilities` |
+Marketplace repos are the git repositories that contain plugin source directories. Identify them by:
+
+1. List symlinks under `~/.claude/plugins/marketplaces/{marketplace}/plugins/`
+2. Resolve each symlink target to find the parent marketplace repo path
+3. Read each repo's `.claude-plugin/marketplace.json` to get repo metadata
 
 ---
 
@@ -42,8 +56,8 @@ Determine which plugin to update:
 5. Extract the `name` and current `version` fields
 
 **If given a plugin name:**
-1. Search across known marketplace repos for `plugins/{name}/.claude-plugin/plugin.json`
-2. Check `b2x-marketplace-marketing` and `b2x-marketplace-utilities`
+1. Search across marketplace repos discovered in Step 0
+2. Look for `plugins/{name}/.claude-plugin/plugin.json` in each
 3. Read the matching `plugin.json`
 
 **If run from inside a plugin subdirectory** (e.g., inside `plugins/{name}/`):
@@ -75,7 +89,7 @@ Update the version in two places:
 Clear the stale cached copy so Claude Code picks up the latest source:
 
 ```bash
-rm -rf ~/.claude/plugins/cache/b2x-local/{plugin-name}/
+rm -rf ~/.claude/plugins/cache/{marketplace}/{plugin-name}/
 ```
 
 This removes all cached versions for the plugin.
@@ -85,34 +99,35 @@ This removes all cached versions for the plugin.
 Uninstall the current version (ignore errors if not installed):
 
 ```bash
-claude plugin uninstall {plugin-name}@b2x-local 2>/dev/null || true
+claude plugin uninstall {plugin-name}@{marketplace} 2>/dev/null || true
 ```
 
 Install the latest version from the symlinked source:
 
 ```bash
-claude plugin install {plugin-name}@b2x-local
+claude plugin install {plugin-name}@{marketplace}
 ```
 
 ## Step 5: Verification
 
 1. Read `~/.claude/plugins/installed_plugins.json`
-2. Confirm entry `{plugin-name}@b2x-local` exists
+2. Confirm entry `{plugin-name}@{marketplace}` exists
 3. Confirm the version matches the new version
 4. List all SKILL.md files in the new cache:
    ```bash
-   find ~/.claude/plugins/cache/b2x-local/{plugin-name}/ -name "SKILL.md"
+   find ~/.claude/plugins/cache/{marketplace}/{plugin-name}/ -name "SKILL.md"
    ```
 5. Report results:
 
 ```
 Plugin: {plugin-name}
+Marketplace: {marketplace}
 Marketplace repo: {marketplace-repo-name}
 Version: {old-version} → {new-version}
 Skills:
   - {skill-1}
   - {skill-2}
-Cache: ~/.claude/plugins/cache/b2x-local/{plugin-name}/{new-version}/
+Cache: ~/.claude/plugins/cache/{marketplace}/{plugin-name}/{new-version}/
 ```
 
 ## Step 6: Git Commit (Optional)
@@ -131,7 +146,7 @@ If the user declines, leave the change unstaged.
 
 **Plugin not found in marketplace repo:**
 - Verify the plugin directory exists: `ls {marketplace-repo}/plugins/{plugin-name}/`
-- Verify the symlink exists: `ls -la ~/.claude/plugins/marketplaces/b2x-local/plugins/{plugin-name}`
+- Verify the symlink exists: `ls -la ~/.claude/plugins/marketplaces/{marketplace}/plugins/{plugin-name}`
 - If missing, suggest running **make-a-plugin** first
 
 **Install fails:**

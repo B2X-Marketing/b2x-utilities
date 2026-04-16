@@ -1,6 +1,19 @@
 # Make-a-Plugin Workflow
 
-Complete procedure for packaging a B2X project as a Claude Code plugin inside a marketplace repo.
+Complete procedure for packaging a project as a Claude Code plugin inside a marketplace repo.
+
+---
+
+## Phase 0: Marketplace Discovery
+
+Determine which local marketplace to target:
+
+1. Read `~/.claude/plugins/known_marketplaces.json`
+2. Filter entries where `source.source` is `"directory"` — these are local marketplaces
+3. If exactly one exists, use its key as `{marketplace}`
+4. If multiple exist, present them to the user and ask which one to target
+5. If none exist, abort: "No local (directory-type) marketplace found in known_marketplaces.json"
+6. Confirm the marketplace directory exists: `~/.claude/plugins/marketplaces/{marketplace}/`
 
 ---
 
@@ -9,7 +22,7 @@ Complete procedure for packaging a B2X project as a Claude Code plugin inside a 
 Plugins live inside marketplace repos, not inside project repos:
 
 ```
-b2x-marketplace-{domain}/          # Marketplace repo (git)
+{marketplace-repo}/
 ├── .claude-plugin/
 │   └── marketplace.json            # Lists all plugins in this marketplace
 └── plugins/
@@ -22,19 +35,20 @@ b2x-marketplace-{domain}/          # Marketplace repo (git)
                 └── references/
 ```
 
-The `b2x-local` runtime marketplace uses symlinks that point to each plugin directory inside a marketplace repo:
+The `{marketplace}` runtime marketplace uses symlinks that point to each plugin directory inside a marketplace repo:
 
 ```
-~/.claude/plugins/marketplaces/b2x-local/plugins/{plugin-name}
+~/.claude/plugins/marketplaces/{marketplace}/plugins/{plugin-name}
   → {marketplace-repo}/plugins/{plugin-name}
 ```
 
-### Known Marketplace Repos
+### Discovering Marketplace Repos
 
-| Repo | Domain | Location |
-|---|---|---|
-| `b2x-marketplace-marketing` | Marketing, strategy, SEO/AEO | `Projects/GitHub/b2x-marketplace-marketing` |
-| `b2x-marketplace-utilities` | Plugin tools, utilities, exports | `Projects/GitHub/b2x-marketplace-utilities` |
+Marketplace repos are the git repositories that contain plugin source directories. Identify them by:
+
+1. List symlinks under `~/.claude/plugins/marketplaces/{marketplace}/plugins/`
+2. Resolve each symlink target to find the parent marketplace repo path
+3. Read each repo's `.claude-plugin/marketplace.json` to get repo metadata and existing plugins
 
 ---
 
@@ -59,24 +73,23 @@ The `b2x-local` runtime marketplace uses symlinks that point to each plugin dire
 
 5. Ask user to approve, modify, add, or remove skills before proceeding
 
-## Phase 3: Choose Target Marketplace
+## Phase 3: Choose Target Marketplace Repo
 
-1. Present the known marketplace repos to the user:
+1. Discover available marketplace repos using the symlink resolution method from Phase 0
+2. Present the discovered repos to the user:
 
-| # | Marketplace | Domain | Existing Plugins |
-|---|---|---|---|
-| 1 | b2x-marketplace-marketing | Marketing, strategy, SEO/AEO | strategy, search-intelligence |
-| 2 | b2x-marketplace-utilities | Plugin tools, utilities, exports | b2x-utilities |
+| # | Marketplace Repo | Existing Plugins |
+|---|---|---|
+| 1 | {repo-name} | {plugin-1}, {plugin-2} |
 
-2. Ask user which marketplace repo should hold this plugin
-3. To get the current list of existing plugins, read each marketplace repo's `.claude-plugin/marketplace.json`
+3. Ask user which marketplace repo should hold this plugin
+4. To get the current list of existing plugins, read each marketplace repo's `.claude-plugin/marketplace.json`
 
 ## Phase 4: Scaffold Plugin Inside Marketplace Repo
 
 1. Derive plugin name:
    - Take the source repo directory name
    - Lowercase, kebab-case
-   - Prepend `b2x-` if not already present (e.g., `Strategy` → `b2x-strategy`)
    - Or use user-provided override
 2. Create directory structure inside the target marketplace repo:
    ```
@@ -98,7 +111,7 @@ For each approved skill:
    - `name`: kebab-case skill name
    - `description`: third-person, includes quoted trigger phrases
    - `version`: `1.0.0`
-   - `author`: `Luis Capobianco`
+   - `author`: from marketplace repo owner or user-provided
    - `tags`: relevant keywords
 3. Write body in imperative form, under ~2,100 characters total:
    - One-line purpose statement
@@ -134,18 +147,18 @@ See `references/CONVENTIONS.md` for all formatting rules.
      "source": "./plugins/{plugin-name}",
      "description": "{one-line description}",
      "version": "1.0.0",
-     "author": { "name": "Luis Capobianco" },
+     "author": { "name": "{author}" },
      "category": "productivity",
      "keywords": ["{keyword1}", "{keyword2}"]
    }
    ```
 5. Write the updated marketplace.json back (preserve existing entries)
 
-### 6b: Update the b2x-local runtime marketplace
+### 6b: Update the {marketplace} runtime marketplace
 
-1. Read `~/.claude/plugins/marketplaces/b2x-local/.claude-plugin/marketplace.json`
+1. Read `~/.claude/plugins/marketplaces/{marketplace}/.claude-plugin/marketplace.json`
 2. Check if the plugin is already listed; add or update as above
-3. Entry format for b2x-local (simpler — no version/author/keywords):
+3. Entry format for `{marketplace}` (simpler — no version/author/keywords):
    ```json
    {
      "name": "{plugin-name}",
@@ -157,31 +170,31 @@ See `references/CONVENTIONS.md` for all formatting rules.
 
 ## Phase 7: Symlink and Install
 
-1. Create the symlink from b2x-local to the marketplace repo's plugin directory:
+1. Create the symlink from `{marketplace}` to the marketplace repo's plugin directory:
    ```bash
    ln -sfn {marketplace-repo-absolute-path}/plugins/{plugin-name} \
-     ~/.claude/plugins/marketplaces/b2x-local/plugins/{plugin-name}
+     ~/.claude/plugins/marketplaces/{marketplace}/plugins/{plugin-name}
    ```
 2. Clear any stale cache:
    ```bash
-   rm -rf ~/.claude/plugins/cache/b2x-local/{plugin-name}/
+   rm -rf ~/.claude/plugins/cache/{marketplace}/{plugin-name}/
    ```
 3. Uninstall if previously installed (ignore errors):
    ```bash
-   claude plugin uninstall {plugin-name}@b2x-local 2>/dev/null || true
+   claude plugin uninstall {plugin-name}@{marketplace} 2>/dev/null || true
    ```
 4. Install:
    ```bash
-   claude plugin install {plugin-name}@b2x-local
+   claude plugin install {plugin-name}@{marketplace}
    ```
 
 ## Phase 8: Verification
 
 1. Read `~/.claude/plugins/installed_plugins.json`
-2. Confirm entry `{plugin-name}@b2x-local` exists with the correct version
+2. Confirm entry `{plugin-name}@{marketplace}` exists with the correct version
 3. List all SKILL.md files in the cache directory:
    ```bash
-   find ~/.claude/plugins/cache/b2x-local/{plugin-name}/ -name "SKILL.md"
+   find ~/.claude/plugins/cache/{marketplace}/{plugin-name}/ -name "SKILL.md"
    ```
 4. For each SKILL.md:
    - Confirm YAML frontmatter has `name` and `description` fields

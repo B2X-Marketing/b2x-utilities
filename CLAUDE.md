@@ -5,7 +5,7 @@ Marketplace repo for utility plugins. Contributes plugins to the `b2x-local` Cla
 ## Structure
 
 ```
-b2x-marketplace-utilities/
+b2x-utilities/
 ├── .claude-plugin/
 │   └── marketplace.json          # Marketplace definition
 └── plugins/
@@ -13,7 +13,8 @@ b2x-marketplace-utilities/
         ├── .claude-plugin/plugin.json
         └── skills/
             ├── make-a-plugin/
-            ├── push-plugin-update/
+            ├── local-publish-plugin/
+            ├── marketplace-publish-plugin/
             └── export-to-apple-notes/
 ```
 
@@ -24,7 +25,8 @@ b2x-marketplace-utilities/
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
 | `make-a-plugin` | "make this a plugin", "package as plugin" | Convert a repo into a registered plugin |
-| `push-plugin-update` | "push plugin update", "bump plugin version" | Deploy changes from source to runtime |
+| `local-publish-plugin` | "publish locally", "refresh plugin", "local publish" | Publish plugin changes to local runtime |
+| `marketplace-publish-plugin` | "publish to marketplace", "publish plugin to GitHub" | Publish plugin to a remote GitHub marketplace |
 | `export-to-apple-notes` | "save to Apple Notes", "post to Notes", "export to Notes" | Format and post content to Apple Notes via MCP |
 
 ## b2x-local Marketplace Architecture
@@ -33,8 +35,8 @@ Two source repos feed into a single runtime marketplace:
 
 | Source repo | Plugins contributed |
 |---|---|
-| `b2x-marketplace-marketing` | strategy, search-intelligence |
-| `b2x-marketplace-utilities` | b2x-utilities |
+| `b2x-marketing` | strategy, search-intelligence |
+| `b2x-utilities` | b2x-utilities |
 
 Runtime location: `~/.claude/plugins/marketplaces/b2x-local/`
 
