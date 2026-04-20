@@ -9,6 +9,7 @@ Plugin lifecycle utilities for Claude Code. Package any project repo as a plugin
 - **marketplace-publish-plugin** — Publish a plugin to a remote GitHub-hosted marketplace via commit or pull request
 - **export-to-apple-notes** — Format and post content to Apple Notes via MCP
 - **book-insights** — Generate 20 prioritized book insights and save to Notion Knowledge Base
+- **voice-profile-interview** - Build a voice profile for a B2X client — person or company — through a research-first, short interactive interview.
 
 ## Installation
 
