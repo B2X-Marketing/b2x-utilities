@@ -1,9 +1,9 @@
 {
   "name": "b2x-utilities",
-  "version": "1.4.0",
-  "description": "Plugin lifecycle utilities and knowledge tools — package repos as plugins, publish locally or to GitHub marketplaces, export content to Apple Notes, and generate book insights into Notion",
+  "version": "1.5.0",
+  "description": "Plugin lifecycle utilities and knowledge tools — package repos as plugins, publish locally or to GitHub marketplaces, export content to Apple Notes, generate book insights into Notion, and build client voice profiles through a short research-first interview",
   "author": {
     "name": "Luis Capobianco"
   },
-  "keywords": ["plugin", "utilities", "marketplace", "packaging", "publish", "github", "apple-notes", "export", "books", "insights", "notion", "knowledge-base"]
+  "keywords": ["plugin", "utilities", "marketplace", "packaging", "publish", "github", "apple-notes", "export", "books", "insights", "notion", "knowledge-base", "voice-profile", "brand-voice", "interview"]
 }
